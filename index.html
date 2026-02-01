@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ASCII Dungeon</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #0f0; height: 100%; }
+    body { font-family: "Courier New", monospace; overflow: hidden; }
+    #ui { display: flex; height: 100%; }
+    #view { white-space: pre; line-height: 1; font-size: 12px; flex: 1; }
+    #side { width: 220px; padding: 8px; box-sizing: border-box; border-left: 1px solid #0f0; }
+    #map { white-space: pre; font-size: 12px; line-height: 1; }
+    #msg { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div id="view"></div>
+    <div id="side">
+      <div><b>ASCII Dungeon</b></div>
+      <div>Arrows: move / turn</div>
+      <div id="map"></div>
+      <div id="msg"></div>
+    </div>
+  </div>
+<script>
+// Simple raycasting ASCII dungeon
+const view = document.getElementById('view');
+const mapEl = document.getElementById('map');
+const msg = document.getElementById('msg');
+
+const MAP = [
+  '###############',
+  '#.....#.......#',
+  '#.###.#.#####..#',
+  '#.#...#.....#.#E',
+  '#.#.#####.#.#.##',
+  '#.#.....#.#.#..#',
+  '#.#####.#.#.##.#',
+  '#.....#.#.#....#',
+  '###.#.#.#.######',
+  '#...#.#.#......#',
+  '#.###.#.######.#',
+  '#.....#........#',
+  '###############'
+];
+const H = MAP.length;
+const W = MAP[0].length;
+
+const DENSITY = ' .:-=+*#%@';
+const FOV = Math.PI / 3;
+const DEPTH = 16;
+const SCREEN_W = 120;
+const SCREEN_H = 40;
+
+let px = 1.5, py = 1.5, pa = 0;
+let won = false;
+
+function isWall(x, y) {
+  if (x < 0 || y < 0 || x >= W || y >= H) return true;
+  return MAP[Math.floor(y)][Math.floor(x)] === '#';
+}
+
+function isExit(x, y) {
+  if (x < 0 || y < 0 || x >= W || y >= H) return false;
+  return MAP[Math.floor(y)][Math.floor(x)] === 'E';
+}
+
+function render() {
+  let out = '';
+  for (let x = 0; x < SCREEN_W; x++) {
+    const rayA = pa - FOV / 2 + (x / SCREEN_W) * FOV;
+    let dist = 0;
+    let hit = false;
+    while (!hit && dist < DEPTH) {
+      dist += 0.05;
+      const rx = px + Math.cos(rayA) * dist;
+      const ry = py + Math.sin(rayA) * dist;
+      if (isWall(rx, ry)) hit = true;
+    }
+    const ceiling = Math.floor(SCREEN_H / 2 - SCREEN_H / dist);
+    const floor = SCREEN_H - ceiling;
+    for (let y = 0; y < SCREEN_H; y++) {
+      if (y < ceiling) {
+        out += ' ';
+      } else if (y > ceiling && y <= floor) {
+        const idx = Math.min(DENSITY.length - 1, Math.floor((1 / dist) * DENSITY.length));
+        out += DENSITY[idx];
+      } else {
+        out += '.';
+      }
+    }
+    out += '\n';
+  }
+  view.textContent = out;
+  renderMap();
+}
+
+function renderMap() {
+  let m = '';
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (Math.floor(px) === x && Math.floor(py) === y) m += '@';
+      else m += MAP[y][x];
+    }
+    m += '\n';
+  }
+  mapEl.textContent = m;
+}
+
+document.addEventListener('keydown', e => {
+  if (won) return;
+  const speed = 0.2;
+  if (e.key === 'ArrowLeft') pa -= 0.1;
+  if (e.key === 'ArrowRight') pa += 0.1;
+  if (e.key === 'ArrowUp') {
+    const nx = px + Math.cos(pa) * speed;
+    const ny = py + Math.sin(pa) * speed;
+    if (!isWall(nx, ny)) { px = nx; py = ny; }
+  }
+  if (e.key === 'ArrowDown') {
+    const nx = px - Math.cos(pa) * speed;
+    const ny = py - Math.sin(pa) * speed;
+    if (!isWall(nx, ny)) { px = nx; py = ny; }
+  }
+  if (isExit(px, py)) {
+    won = true;
+    msg.textContent = 'You escaped the dungeon.';
+  }
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
