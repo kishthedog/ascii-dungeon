@@ -113,8 +113,8 @@ function renderMap() {
 document.addEventListener('keydown', e => {
   if (won) return;
   const speed = 0.2;
-   if (e.key === 'ArrowLeft') pa += 0.1;
-   if (e.key === 'ArrowRight') pa -= 0.1;
+   if (e.key === 'ArrowLeft') pa -= 0.1;
+   if (e.key === 'ArrowRight') pa += 0.1;
   if (e.key === 'ArrowUp') {
     const nx = px + Math.cos(pa) * speed;
     const ny = py + Math.sin(pa) * speed;
