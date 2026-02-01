@@ -6,9 +6,10 @@
   <style>
     html, body { margin: 0; padding: 0; background: #000; color: #0f0; height: 100%; }
     body { font-family: "Courier New", monospace; overflow: hidden; }
-    #ui { display: flex; height: 100%; }
-    #view { white-space: pre; line-height: 1; font-size: 12px; flex: 1; }
-    #side { width: 220px; padding: 8px; box-sizing: border-box; border-left: 1px solid #0f0; }
+    body { display: flex; align-items: center; justify-content: center; }
+    #ui { position: relative; }
+    #view { white-space: pre; line-height: 1; font-size: 12px; width: 40ch; height: 40ch; }
+    #side { position: absolute; top: 0; right: -22ch; width: 22ch; padding: 8px; box-sizing: border-box; border-left: 1px solid #0f0; }
     #map { white-space: pre; font-size: 12px; line-height: 1; }
     #msg { margin-top: 8px; }
   </style>
@@ -50,8 +51,8 @@ const W = MAP[0].length;
 const DENSITY = ' .:-=+*#%@';
 const FOV = Math.PI / 3;
 const DEPTH = 16;
-const SCREEN_W = 120;
-const SCREEN_H = 40;
+ const SCREEN_W = 40;
+ const SCREEN_H = 40;
 
 let px = 1.5, py = 1.5, pa = 0;
 let won = false;
