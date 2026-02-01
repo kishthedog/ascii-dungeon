@@ -68,7 +68,7 @@ function isExit(x, y) {
 }
 
 function render() {
-  const buf = Array.from({ length: SCREEN_W }, () => Array(SCREEN_H).fill(' '));
+  const buf = Array.from({ length: SCREEN_H }, () => Array(SCREEN_W).fill(' '));
   for (let x = 0; x < SCREEN_W; x++) {
     const rayA = pa - FOV / 2 + (x / SCREEN_W) * FOV;
     let dist = 0;
@@ -79,24 +79,19 @@ function render() {
       const ry = py + Math.sin(rayA) * dist;
       if (isWall(rx, ry)) hit = true;
     }
-    const ceiling = Math.floor(SCREEN_H / 2 - SCREEN_H / dist);
-    const floor = SCREEN_H - ceiling;
+    const wallHeight = Math.floor(SCREEN_H / Math.max(dist, 0.1));
+    const ceiling = Math.floor((SCREEN_H - wallHeight) / 2);
+    const floor = ceiling + wallHeight;
+    const idx = Math.min(DENSITY.length - 1, Math.floor((1 / dist) * DENSITY.length));
     for (let y = 0; y < SCREEN_H; y++) {
-      if (y < ceiling) {
-        buf[x][y] = ' ';
-      } else if (y > ceiling && y <= floor) {
-        const idx = Math.min(DENSITY.length - 1, Math.floor((1 / dist) * DENSITY.length));
-        buf[x][y] = DENSITY[idx];
-      } else {
-        buf[x][y] = '.';
-      }
+      if (y < ceiling) buf[y][x] = ' ';
+      else if (y >= ceiling && y < floor) buf[y][x] = DENSITY[idx];
+      else buf[y][x] = '.';
     }
   }
   let out = '';
   for (let y = 0; y < SCREEN_H; y++) {
-    for (let x = 0; x < SCREEN_W; x++) {
-      out += buf[SCREEN_W - 1 - x][y];
-    }
+    for (let x = 0; x < SCREEN_W; x++) out += buf[y][x];
     out += '\n';
   }
   view.textContent = out;
