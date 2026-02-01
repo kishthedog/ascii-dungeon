@@ -68,7 +68,7 @@ function isExit(x, y) {
 }
 
 function render() {
-  let out = '';
+  const buf = Array.from({ length: SCREEN_W }, () => Array(SCREEN_H).fill(' '));
   for (let x = 0; x < SCREEN_W; x++) {
     const rayA = pa - FOV / 2 + (x / SCREEN_W) * FOV;
     let dist = 0;
@@ -83,13 +83,19 @@ function render() {
     const floor = SCREEN_H - ceiling;
     for (let y = 0; y < SCREEN_H; y++) {
       if (y < ceiling) {
-        out += ' ';
+        buf[x][y] = ' ';
       } else if (y > ceiling && y <= floor) {
         const idx = Math.min(DENSITY.length - 1, Math.floor((1 / dist) * DENSITY.length));
-        out += DENSITY[idx];
+        buf[x][y] = DENSITY[idx];
       } else {
-        out += '.';
+        buf[x][y] = '.';
       }
+    }
+  }
+  let out = '';
+  for (let y = 0; y < SCREEN_H; y++) {
+    for (let x = 0; x < SCREEN_W; x++) {
+      out += buf[SCREEN_W - 1 - x][y];
     }
     out += '\n';
   }
